@@ -14,7 +14,14 @@ spec:
     spec:
       containers:
         - name: react-demo
-          image: gcr.io/onus-sandbox/react-demo:v1.0.0
+          image: gcr.io/onus-sandbox/react-demo:v1.0.1
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "/postStart.sh"]
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "echo Hello from the preStop handler > /usr/share/message"]
           imagePullPolicy: Always
           ports:
           - containerPort: 80
@@ -43,3 +50,8 @@ spec:
             limits:
               cpu: "100m"
               memory: "0.5Gi"
+          env:
+          - name: MY_POD_ID 
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
