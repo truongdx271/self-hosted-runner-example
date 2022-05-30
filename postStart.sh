@@ -1,5 +1,2 @@
 #!/bin/bash
-curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello message from preStart handler script | react-demo"}' https://hooks.slack.com/services/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
-
-echo "HOSTNAME has the value: $HOSTNAME"  >> /usr/share/message
-echo "MY_POD_ID has the value: $MY_POD_ID"  >> /usr/share/message
+curl -X POST -H 'Content-type: application/json' --data "{"text":"POD: $HOSTNAME - IP: $MY_POD_IP - NS: $MY_POD_NAMESPACE has been started"}" https://hooks.slack.com/services/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
