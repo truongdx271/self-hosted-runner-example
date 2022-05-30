@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: react-demo
-          image: gcr.io/onus-sandbox/react-demo:v1.0.1
+          image: gcr.io/onus-sandbox/react-demo:v1.0.2
           lifecycle:
             postStart:
               exec:
