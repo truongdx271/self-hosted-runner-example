@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: react-demo
+  template:
+    metadata:
+      labels:
+        app: react-demo
+    spec:
+      containers:
+        - name: react-demo
+          image: gcr.io/onus-sandbox/react-demo:v1.0.0
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            periodSeconds: 5
+            timeoutSeconds: 4 
+            successThreshold: 1
+            failureThreshold: 3
+            initialDelaySeconds: 30 
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            periodSeconds: 5
+            timeoutSeconds: 4
+            successThreshold: 1
+            failureThreshold: 3
+            initialDelaySeconds: 30
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "0.2Gi"
+            limits:
+              cpu: "100m"
+              memory: "0.5Gi"

@@ -20,7 +20,7 @@ jobs:
         cache: 'yarn' # or yarn
     
     - name: Setup yarn
-      run: yarn
+      run: yarn install
     
     - name: Build source
       run: yarn build
