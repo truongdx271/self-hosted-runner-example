@@ -6,4 +6,8 @@ COPY postStart.sh /postStart.sh
 
 RUN chmod +x /postStart.sh
 
+COPY preStop.sh /preStop.sh
+
+RUN chmod +x /preStop.sh
+
 COPY build/ /usr/share/nginx/html
