@@ -4,10 +4,12 @@ on:
     branches: [main]
 
 env:
-  IMAGE_NAME: gcr.io/onus-sandbox/react-demo
+  IMAGE_NAME: react-demo
   PROJECT_ID: onus-sandbox
   GKE_ZONE: asia-southeast1-b
   GKE_CLUSTER: sandbox-gke
+  NAMESPACE: test
+  DEPLOYMENT: react-demo
 
 jobs:
   build-push-gcr:
@@ -49,13 +51,13 @@ jobs:
       run: yarn build
 
     - name: Build docker image
-      run: docker build . -t $IMAGE_NAME:latest
+      run: docker build . -t gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
 
     - name: Push Image to Container Registry (GCR)
       run: |-
-        docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.vars.outputs.sha_short }}
-        docker push $IMAGE_NAME:latest
-        docker push $IMAGE_NAME:${{ steps.vars.outputs.sha_short }}
+        docker tag gcr.io/$PROJECT_ID/$IMAGE_NAME:latest gcr.io/$PROJECT_ID/$IMAGE_NAME:${{ steps.vars.outputs.sha_short }}
+        docker push gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
+        docker push gcr.io/$PROJECT_ID/$IMAGE_NAME:${{ steps.vars.outputs.sha_short }}
     
     outputs:
       GIT_TAG: ${{ steps.vars.outputs.sha_short }}
@@ -90,4 +92,4 @@ jobs:
         IMAGE_TAG: ${{ needs.build-push-gcr.outputs.GIT_TAG }}
       run: |-
         echo $IMAGE_TAG
-        kubectl set image deployment react-demo react-demo=$IMAGE_NAME:$IMAGE_TAG
+        kubectl -n $NAMESPACE set image deployment $DEPLOYMENT $IMAGE_NAME=gcr.io/$PROJECT_ID/$IMAGE_NAME:$IMAGE_TAG
