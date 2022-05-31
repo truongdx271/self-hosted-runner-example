@@ -5,6 +5,9 @@ on:
 
 env:
   IMAGE_NAME: gcr.io/onus-sandbox/react-demo
+  PROJECT_ID: onus-sandbox
+  GKE_ZONE: asia-southeast1-b
+  GKE_CLUSTER: sandbox-gke
 
 jobs:
   build-push-gcr:
@@ -54,5 +57,36 @@ jobs:
         docker push $IMAGE_NAME:latest
         docker push $IMAGE_NAME:${{ steps.vars.outputs.sha_short }}
     
-    - name: Rolling update deployment
-      run: kubectl set image deployment react-demo react-demo=$IMAGE_NAME:${{ steps.vars.outputs.sha_short }}
+    outputs:
+      GIT_TAG: ${{ steps.vars.outputs.sha_short }}
+# Deploy to GKE
+  deploy-to-gke:
+    runs-on: ubuntu-latest
+    needs: build-push-gcr
+    
+    # Setup gcloud CLI
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.SANDBOX_SA }}'
+
+    - name: 'Set up Cloud SDK'
+      uses: google-github-actions/setup-gcloud@v0
+    
+    - name: 'Use gcloud CLI'
+      run: 'gcloud info'
+    
+    # Get the GKE credentials so we can deploy to the cluster
+    - uses: google-github-actions/get-gke-credentials@v0
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+        credentials: ${{ secrets.SANDBOX_SA }}
+    
+    # Deploy the new Docker image to GKE cluster
+    - name: Deploy
+      env:
+        IMAGE_TAG: ${{ needs.build-push-gcr.outputs.GIT_TAG }}
+      run: |-
+        echo $IMAGE_TAG
+        kubectl set image deployment react-demo react-demo=$IMAGE_NAME:$IMAGE_TAG
