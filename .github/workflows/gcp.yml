@@ -29,6 +29,11 @@ jobs:
       run: |-
         gcloud auth configure-docker --quiet
 
+    - name: Declare some variables
+      id: vars
+      shell: bash
+      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
@@ -40,16 +45,9 @@ jobs:
     - name: Build source
       run: yarn build
 
-    - name: Get Hash
-      id: hash
-      run: echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_HASH
-    
-    - name: Check Hash
-      run: echo "${{ env.hash }}"
-
     - name: Build docker image
       run: docker build . -t $IMAGE_NAME:latest
 
     - name: Push Image to Container Registry (GCR)
       run: |-
-        docker tag $IMAGE_NAME:latest $IMAGE_NAME:$env.hash
+        docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ steps.vars.outputs.sha_short }}
