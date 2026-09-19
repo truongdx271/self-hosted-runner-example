@@ -60,4 +60,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
           - name: SLACK_URL
-            value: https://hooks.slack.com/services/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
+            valueFrom:
+              secretKeyRef:
+                name: react-demo-secrets
+                key: slack-url
